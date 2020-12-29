@@ -1,6 +1,7 @@
 #ifndef GRAPHS_CPP_GRAPH_H
 #define GRAPHS_CPP_GRAPH_H
 
+#include <utility>
 #include <vector>
 #include <sstream>
 #include <algorithm>
@@ -9,10 +10,11 @@
 
 namespace graph {
 
+    // Interface of a graph
     class Graph {
     public:
-        virtual void addEdge(int v, int w) = 0; // add edge v-w
-        [[nodiscard]] virtual const std::vector<int>& adj(int v) const = 0; // get edges adjacent to v
+        virtual void addEdge(int v, int w) = 0; // add edge v-w to graph
+        [[nodiscard]] virtual const std::vector<int>& adj(int v) const = 0; // get vertices adjacent to v
         [[nodiscard]] virtual int V() const = 0; // number of vertices
         [[nodiscard]] virtual int E() const = 0; // number of edges
         [[nodiscard]] virtual std::string toString() const = 0; // create string representation
@@ -20,65 +22,72 @@ namespace graph {
         virtual ~Graph() = default; // virtual destructor
     };
 
+    // Graph built with adjacency list
     class AdjacencyListGraph : public Graph {
     public:
         // create graph with V vertices
         explicit AdjacencyListGraph(int V) :
                 numV(V),
                 numE(0),
-                vertices(V, std::vector<int>{}) {}
+                adjacencies(V, std::vector<int>{}) {}
 
         // create graph with input stream
         explicit AdjacencyListGraph(std::istream &is) {
             if (!(is >> numV) || numV < 0) throw std::invalid_argument("Invalid format (V)");
             if (!(is >> numE || numE < 0)) throw std::invalid_argument("Invalid format (E)");
-            vertices.insert(vertices.end(), numV, {});
+            adjacencies.insert(adjacencies.end(), numV, {});
             for (int i = 0; i < numE; ++i) {
                 int v1, v2;
                 if (!(is >> v1 >> v2)) throw std::invalid_argument("Invalid format (edges)");
                 if (v1 < 0 || v1 >= numV || v2 < 0 || v2 >= numV) {
                     throw std::invalid_argument("Cannot create edge v1-v2");
                 }
-                vertices[v1].push_back(v2);
-                vertices[v2].push_back(v1);
+                adjacencies[v1].push_back(v2);
+                adjacencies[v2].push_back(v1);
             }
         }
 
+        // add edge v-w to graph
         void addEdge(int v, int w) override {
             if (!vertexValid(v) || !vertexValid(w)) {
                 throw std::invalid_argument("Cannot create edge v-w");
             }
-            vertices[v].push_back(w);
-            vertices[w].push_back(v);
+            adjacencies[v].push_back(w);
+            adjacencies[w].push_back(v);
             ++numE;
         }
 
+        // get vertices adjacent to v
         [[nodiscard]] const std::vector<int>& adj(int v) const override {
             if (!vertexValid(v)) {
                 throw std::invalid_argument("Invalid vertex");
             }
-            return vertices[v];
+            return adjacencies[v];
         }
 
+        // number of vertices
         [[nodiscard]] int V() const override {
             return numV;
         }
 
+        // number of edges
         [[nodiscard]] int E() const override {
             return numE;
         }
 
+        // create string representation
         [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "[Graph with " << numV << " vertices and " << numE << " edges]\n";
-            for (size_t i = 0; i < vertices.size(); ++i) {
-                for (const auto edge : vertices[i]) {
+            for (size_t i = 0; i < adjacencies.size(); ++i) {
+                for (const auto edge : adjacencies[i]) {
                     ss << i << "-" << edge << "\n";
                 }
             }
             return ss.str();
         }
 
+        // whether a vertex exists
         [[nodiscard]] bool vertexValid(int v) const override {
             return v >= 0 && v < numV;
         }
@@ -86,7 +95,7 @@ namespace graph {
     private:
         int numV = 0; // vertices
         int numE = 0; // edges
-        std::vector<std::vector<int>> vertices{}; // vector with V elements each of size degree(vertex) to represent edges
+        std::vector<std::vector<int>> adjacencies{}; // vector with V elements each of size degree(vertex) to represent edges
 
     };
 
@@ -122,101 +131,47 @@ namespace graph {
         return num/2; // each self-loop is counted twice
     }
 
-    // Depth First Search for paths starting at a specific vertex
-    class PathsFromDFS {
-    public:
-        explicit PathsFromDFS(const Graph &g, const int _start) :
-                start {_start}, marked(g.V(), false), edgeTo(g.V(), -1) {
-            dfs(g, start);
-        }
-
-        [[nodiscard]] bool hasPathTo(int v) const {
-            if(!validVertex(v)) {
-                return false;
-            } else {
-                return marked[v];
-            }
-        }
-
-        [[nodiscard]] std::vector<int> pathTo(const int v) const {
-            if(!hasPathTo(v)) {
-                return {};
-            }
-
-            // build path in the reverse direction
-            std::vector<int> path{v};
-            int prev = edgeTo[v];
-            while(prev != -1) {
-                path.push_back(prev);
-                prev = edgeTo[prev];
-            }
-
-            std::reverse(path.begin(), path.end());
-            return path;
-        }
-
-    private:
-        const int start; // from which vertex the search started
-        std::deque<bool> marked; // whether a vertex was already visited
-        std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
-
-        void dfs(const Graph& g, const int v) { // NOLINT (recursion)
-            marked[v] = true; // mark as visited
-            for(const int other : g.adj(v)) {
-                if(!marked[other]) {
-                    dfs(g, other);
-                    edgeTo[other] = v; // save that we got to other from v
-                }
-            }
-        }
-
-        [[nodiscard]] bool validVertex(const int v) const {
-            if(v < 0 || static_cast<size_t>(v) >= marked.size()) {
+    namespace internal {
+        // return whether element v exists in a collection col
+        template<typename Col>
+        [[nodiscard]] inline bool validIndex(const Col& col, const int v) {
+            if(v < 0 || static_cast<size_t>(v) >= col.size()) {
                 return false;
             } else {
                 return true;
             }
         }
-    };
 
-    // Breadth First Search for paths starting at a specific vertex
-    class PathsFromBFS {
+    } // namespace internal
+
+    // Result of a search for all paths reachable from a specific vortex
+    class PathsFromVertexResult {
     public:
-        explicit PathsFromBFS(const Graph &g, const int _start) :
-                start {_start}, distTo(g.V(), -1), edgeTo(g.V(), -1) {
-            std::queue<int> queue{};
-            queue.push(start);
-            distTo[start] = 0;
-            while(!queue.empty()) {
-                const int v = queue.front();
-                queue.pop();
-                for(const int other : g.adj(v)) {
-                    if(distTo[other] == -1) {
-                        // yet unvisited
-                        queue.push(other);
-                        edgeTo[other] = v;
-                        distTo[other] = distTo[v]+1;
-                    }
-                }
-            }
+        // Construct by copying fields
+        explicit PathsFromVertexResult(int _start, const std::vector<int>& _distTo, const std::vector<int>& _edgeTo) // NOLINT
+                                       :
+                                       start(_start), distTo(_distTo), edgeTo(_edgeTo) {}
+
+        // Construct by moving fields
+        explicit PathsFromVertexResult(int _start, std::vector<int>&& _distTo, std::vector<int>&& _edgeTo)
+                                       :
+                                       start(_start), distTo(std::move(_distTo)), edgeTo(std::move(_edgeTo)) {}
+
+        // from which vertex the search was started
+        [[nodiscard]] int from() const {
+            return start;
         }
 
-        [[nodiscard]] bool hasPathTo(int v) const {
-            if(!validVertex(v)) {
+        // whether a path from start to v exists
+        [[nodiscard]] bool hasPathTo(const int v) const {
+            if(!internal::validIndex(distTo, v)) {
                 return false;
             } else {
                 return distTo[v] != -1;
             }
         }
 
-        [[nodiscard]] int distanceTo(int v) const {
-            if(!validVertex(v)) {
-                return -1;
-            } else {
-                return distTo[v];
-            }
-        }
-
+        // the saved path from start to v or an empty result
         [[nodiscard]] std::vector<int> pathTo(const int v) const {
             if(!hasPathTo(v)) {
                 return {};
@@ -234,19 +189,82 @@ namespace graph {
             return path;
         }
 
-    private:
-        const int start; // from which vertex the search started
-        std::vector<int> distTo; // number of steps from start to vertex
-        std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
-
-        [[nodiscard]] bool validVertex(const int v) const {
-            if(v < 0 || static_cast<size_t>(v) >= distTo.size()) {
-                return false;
+        [[nodiscard]] int distanceTo(const int v) const {
+            if(!internal::validIndex(distTo, v)) {
+                return -1;
             } else {
-                return true;
+                return distTo[v];
             }
         }
+    private:
+        const int start; // from which vertex the search started
+        const std::vector<int> distTo; // number of steps from start to vertex
+        const std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
     };
+
+    namespace depth_first_search {
+        namespace internal {
+            // Recursive function for depth first search to all vertices from v
+            void fromVertexToAllRec(const Graph& g, const int v, // NOLINT
+                                    std::vector<int>& distTo, std::vector<int>& edgeTo) {
+                for(const int other : g.adj(v)) {
+                    if(distTo[other] == -1) {
+                        // not yet visited
+                        distTo[other] = distTo[v]+1;
+                        edgeTo[other] = v; // save that we got to other from v
+                        fromVertexToAllRec(g, other, distTo, edgeTo);
+                    }
+                }
+            }
+        }
+
+        // Depth-first search from vertex start to all reachable vertices
+        PathsFromVertexResult fromVertexToAll(const Graph &g, const int start) {
+            if(!g.vertexValid(start)) throw std::invalid_argument("Invalid start vertex");
+
+            std::vector<int> distTo(g.V(), -1); // number of steps from start to vertex
+            std::vector<int> edgeTo(g.V(), -1); // from which vertex another vertex was visited from the first time
+
+            distTo[start] = 0;
+            // start recursive depth-first start from start
+            internal::fromVertexToAllRec(g, start, distTo, edgeTo);
+
+            // return queryable results
+            return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
+        }
+    } // depth_first_search
+
+    namespace breadth_first_search {
+        // Breadth-first search from vertex start to all reachable vertices
+        PathsFromVertexResult fromVertexToAll(const Graph &g, const int start) {
+            if(start < 0 || start >= g.V()) throw std::invalid_argument("Invalid start vertex");
+
+            std::vector<int> distTo(g.V(), -1); // number of steps from start to vertex
+            std::vector<int> edgeTo(g.V(), -1); // from which vertex another vertex was visited from the first time
+
+            std::queue<int> queue{};
+            queue.push(start);
+            distTo[start] = 0;
+            while (!queue.empty()) {
+                // remove vertex from queue
+                const int v = queue.front();
+                queue.pop();
+                // add all yet unvisited adjacent vertices to queue and mark them
+                for (const int other : g.adj(v)) {
+                    if (distTo[other] == -1) {
+                        // yet unvisited
+                        queue.push(other);
+                        edgeTo[other] = v;
+                        distTo[other] = distTo[v] + 1;
+                    }
+                }
+            }
+
+            // return queryable results
+            return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
+        }
+
+    }
 
 } // namespace graph
 

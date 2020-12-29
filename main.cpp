@@ -3,9 +3,8 @@
 #include <memory>
 #include "Graph.h"
 
-using namespace graph;
-
-void print_vec(const std::vector<int>& vec, const char* delim="->", const char* last="\n") {
+// print elements of a vector to stdout separated by delimiter and with last at the end
+void print_vec(const std::vector<int>& vec, const char* delimiter="->", const char* last="\n") {
     if(vec.empty()) return;
 
     bool first=true;
@@ -13,22 +12,32 @@ void print_vec(const std::vector<int>& vec, const char* delim="->", const char* 
         if(first) {
             first = false;
         } else {
-            std::cout<<delim;
+            std::cout << delimiter;
         }
         std::cout<<elem;
     }
     std::cout<<last;
 }
 
+// print all paths saved in paths to stdout
+void print_paths(const graph::Graph& g, const graph::PathsFromVertexResult& paths) {
+    for(int i=0; i<g.V(); ++i) {
+        if(paths.hasPathTo(i)) {
+            std::cout << "0 to " << i << " (dist=" << paths.distanceTo(i) << "): ";
+            print_vec(paths.pathTo(i));
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
-    std::unique_ptr<Graph> pGraph;
+    std::unique_ptr<graph::Graph> pGraph;
     if(argc > 1) {
-        // try to read filename
+        // try to read file passed as argument
         std::ifstream ifs(argv[1]);
-        pGraph = std::make_unique<AdjacencyListGraph>(ifs);
+        pGraph = std::make_unique<graph::AdjacencyListGraph>(ifs);
     } else {
         // try to read stdin
-        pGraph = std::make_unique<AdjacencyListGraph>(std::cin);
+        pGraph = std::make_unique<graph::AdjacencyListGraph>(std::cin);
     }
 
     // basic ops
@@ -37,25 +46,19 @@ int main(int argc, char* argv[]) {
     std::cout << "Max degree: " << maxDegree(*pGraph) << "\n";
     std::cout << "Average degree: " << avgDegree(*pGraph) << "\n";
     std::cout << "Number of self-loops: " << numSelfLoops(*pGraph) << "\n";
+    std::cout<<"----\n";
 
-    // Depth First Search
-    PathsFromDFS dfsPathsFrom0(*pGraph, 0);
-    std::cout<<"All DFS paths from 0: \n";
-    for(int i=0; i<pGraph->V(); ++i) {
-        if(dfsPathsFrom0.hasPathTo(i)) {
-            std::cout<<"0 to "<<i<<": ";
-            print_vec(dfsPathsFrom0.pathTo(i));
-        }
-    }
+    // Depth-first Search
+    graph::PathsFromVertexResult dfs_from_0 = graph::depth_first_search::fromVertexToAll(*pGraph, 0);
+    std::cout<<"Found DFS paths from 0: \n";
+    print_paths(*pGraph, dfs_from_0);
+    std::cout<<"----\n";
 
-    // Breadth First Search
-    PathsFromBFS bfsPathsFrom0(*pGraph, 0);
-    std::cout<<"----\nAll BFS paths from 0: \n";
-    for(int i=0; i<pGraph->V(); ++i) {
-        if(bfsPathsFrom0.hasPathTo(i)) {
-            std::cout<<"0 to "<<i<<" (dist="<<bfsPathsFrom0.distanceTo(i)<<"): ";
-            print_vec(bfsPathsFrom0.pathTo(i));
-        }
-    }
+    // Breadth-first Search
+    graph::PathsFromVertexResult bfs_from_0 = graph::breadth_first_search::fromVertexToAll(*pGraph, 0);
+    std::cout<<"Found BFS paths from 0: \n";
+    print_paths(*pGraph, bfs_from_0);
+    std::cout<<"----\n";
+
     return 0;
 }
