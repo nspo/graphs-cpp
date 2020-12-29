@@ -4,6 +4,8 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <deque>
+#include <queue>
 
 namespace graph {
 
@@ -125,7 +127,7 @@ namespace graph {
     public:
         explicit PathsFromDFS(const Graph &g, const int _start) :
                 start {_start}, marked(g.V(), false), edgeTo(g.V(), -1) {
-            dfs(g, start, -1);
+            dfs(g, start);
         }
 
         [[nodiscard]] bool hasPathTo(int v) const {
@@ -155,21 +157,90 @@ namespace graph {
 
     private:
         const int start; // from which vertex the search started
-        std::vector<bool> marked; // whether a vertex was already visited
+        std::deque<bool> marked; // whether a vertex was already visited
         std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
 
-        void dfs(const Graph& g, const int v, const int fromV) {
+        void dfs(const Graph& g, const int v) { // NOLINT (recursion)
             marked[v] = true; // mark as visited
-            edgeTo[v] = fromV; // save that we got to v from fromV
             for(const int other : g.adj(v)) {
                 if(!marked[other]) {
-                    dfs(g, other, v);
+                    dfs(g, other);
+                    edgeTo[other] = v; // save that we got to other from v
                 }
             }
         }
 
         [[nodiscard]] bool validVertex(const int v) const {
             if(v < 0 || static_cast<size_t>(v) >= marked.size()) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    };
+
+    // Breadth First Search for paths starting at a specific vertex
+    class PathsFromBFS {
+    public:
+        explicit PathsFromBFS(const Graph &g, const int _start) :
+                start {_start}, distTo(g.V(), -1), edgeTo(g.V(), -1) {
+            std::queue<int> queue{};
+            queue.push(start);
+            distTo[start] = 0;
+            while(!queue.empty()) {
+                const int v = queue.front();
+                queue.pop();
+                for(const int other : g.adj(v)) {
+                    if(distTo[other] == -1) {
+                        // yet unvisited
+                        queue.push(other);
+                        edgeTo[other] = v;
+                        distTo[other] = distTo[v]+1;
+                    }
+                }
+            }
+        }
+
+        [[nodiscard]] bool hasPathTo(int v) const {
+            if(!validVertex(v)) {
+                return false;
+            } else {
+                return distTo[v] != -1;
+            }
+        }
+
+        [[nodiscard]] int distanceTo(int v) const {
+            if(!validVertex(v)) {
+                return -1;
+            } else {
+                return distTo[v];
+            }
+        }
+
+        [[nodiscard]] std::vector<int> pathTo(const int v) const {
+            if(!hasPathTo(v)) {
+                return {};
+            }
+
+            // build path in the reverse direction
+            std::vector<int> path{v};
+            int prev = edgeTo[v];
+            while(prev != -1) {
+                path.push_back(prev);
+                prev = edgeTo[prev];
+            }
+
+            std::reverse(path.begin(), path.end());
+            return path;
+        }
+
+    private:
+        const int start; // from which vertex the search started
+        std::vector<int> distTo; // number of steps from start to vertex
+        std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
+
+        [[nodiscard]] bool validVertex(const int v) const {
+            if(v < 0 || static_cast<size_t>(v) >= distTo.size()) {
                 return false;
             } else {
                 return true;
