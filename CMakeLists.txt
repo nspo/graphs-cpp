@@ -9,7 +9,7 @@ else()
 add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-include_directories(.)
+include_directories(include)
 
 add_executable(graphs_test main.cpp)
 

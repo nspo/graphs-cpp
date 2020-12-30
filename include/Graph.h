@@ -7,10 +7,11 @@
 #include <algorithm>
 #include <deque>
 #include <queue>
+#include <stack>
 
 namespace graph {
 
-    // Interface of a graph
+    // Interface of an undirected graph
     class Graph {
     public:
         virtual void addEdge(int v, int w) = 0; // add edge v-w to graph
@@ -133,7 +134,7 @@ namespace graph {
 
     namespace internal {
         // Check all unvisited vertices connected to v recursively with DFS for whether they prevent bipartiteness
-        bool isBipartiteRec(const Graph& g, const int v, const int lastSetId, std::vector<int>& setId) {
+        bool isBipartiteRec(const Graph& g, const int v, const int lastSetId, std::vector<int>& setId) { // NOLINT
             const int expectedSetId = lastSetId == 0 ? 1 : 0; // value which vertices adjacent to v must have
             // check all vertices adjacent to v
             for(const int other : g.adj(v)) {
@@ -155,7 +156,6 @@ namespace graph {
     bool isBipartite(const Graph& g) {
         // assign 0 and 1 in alternation to all vertices via DFS
         std::vector<int> setId(g.V(), -1);
-//        int lastId = 1; // so that the very first vertex is assigned 0 - does not matter though
         for(int i=0; i<g.V(); ++i) {
             if(setId[i] == -1) {
                 // yet unvisited component
@@ -180,82 +180,135 @@ namespace graph {
 
     } // namespace internal
 
-    // Result of a search for all paths reachable from a specific vortex
-    class PathsFromVertexResult {
-    public:
-        // Construct by copying fields
-        explicit PathsFromVertexResult(int _start, const std::vector<int>& _distTo, const std::vector<int>& _edgeTo) // NOLINT
-                                       :
-                                       start(_start), distTo(_distTo), edgeTo(_edgeTo) {}
+    // Finding paths to all other connected vertices starting at a specific vertex
+    namespace find_paths_to_all {
+        // Result of a search for all paths reachable from a specific vortex
+        class PathsFromVertexResult {
+        public:
+            // Construct by copying fields
+            explicit PathsFromVertexResult(int _start, const std::vector<int>& _distTo, const std::vector<int>& _edgeTo) // NOLINT
+                    :
+                    start(_start), distTo(_distTo), edgeTo(_edgeTo) {}
 
-        // Construct by moving fields
-        explicit PathsFromVertexResult(int _start, std::vector<int>&& _distTo, std::vector<int>&& _edgeTo)
-                                       :
-                                       start(_start), distTo(std::move(_distTo)), edgeTo(std::move(_edgeTo)) {}
+            // Construct by moving fields
+            explicit PathsFromVertexResult(int _start, std::vector<int>&& _distTo, std::vector<int>&& _edgeTo)
+                    :
+                    start(_start), distTo(std::move(_distTo)), edgeTo(std::move(_edgeTo)) {}
 
-        // from which vertex the search was started
-        [[nodiscard]] int from() const {
-            return start;
-        }
-
-        // whether a path from start to v exists
-        [[nodiscard]] bool hasPathTo(const int v) const {
-            if(!internal::validIndex(distTo, v)) {
-                return false;
-            } else {
-                return distTo[v] != -1;
-            }
-        }
-
-        // the saved path from start to v or an empty result
-        [[nodiscard]] std::vector<int> pathTo(const int v) const {
-            if(!hasPathTo(v)) {
-                return {};
+            // from which vertex the search was started
+            [[nodiscard]] int from() const {
+                return start;
             }
 
-            // build path in the reverse direction
-            std::vector<int> path{v};
-            int prev = edgeTo[v];
-            while(prev != -1) {
-                path.push_back(prev);
-                prev = edgeTo[prev];
+            // whether a path from start to v exists
+            [[nodiscard]] bool hasPathTo(const int v) const {
+                if(!graph::internal::validIndex(distTo, v)) {
+                    return false;
+                } else {
+                    return distTo[v] != -1;
+                }
             }
 
-            std::reverse(path.begin(), path.end());
-            return path;
-        }
+            // the saved path from start to v or an empty result
+            [[nodiscard]] std::vector<int> pathTo(const int v) const {
+                if(!hasPathTo(v)) {
+                    return {};
+                }
 
-        [[nodiscard]] int distanceTo(const int v) const {
-            if(!internal::validIndex(distTo, v)) {
-                return -1;
-            } else {
-                return distTo[v];
+                // build path in the reverse direction
+                std::vector<int> path{v};
+                int prev = edgeTo[v];
+                while(prev != -1) {
+                    path.push_back(prev);
+                    prev = edgeTo[prev];
+                }
+
+                std::reverse(path.begin(), path.end());
+                return path;
             }
-        }
-    private:
-        const int start; // from which vertex the search started
-        const std::vector<int> distTo; // number of steps from start to vertex
-        const std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
-    };
 
-    namespace depth_first_search {
+            [[nodiscard]] int distanceTo(const int v) const {
+                if(!graph::internal::validIndex(distTo, v)) {
+                    return -1;
+                } else {
+                    return distTo[v];
+                }
+            }
+
+            bool operator==(const PathsFromVertexResult& rhs) const {
+                if(this == &rhs) return true;
+                // compare sizes
+                if(start != rhs.start || distTo.size() != rhs.distTo.size() || edgeTo.size() != rhs.edgeTo.size()) {
+                    return false;
+                }
+                // compare actual content
+                if(distTo != rhs.distTo || edgeTo != rhs.edgeTo) {
+                    return false;
+                }
+                return true;
+            }
+
+            bool operator!=(const PathsFromVertexResult& rhs) const {
+                return !(*this == rhs);
+            }
+
+        private:
+            const int start; // from which vertex the search started
+            const std::vector<int> distTo; // number of steps from start to vertex
+            const std::vector<int> edgeTo; // from which vertex another vertex was visited from the first time
+        };
+
+        // Depth-first search from vertex start to all reachable vertices without recursion
+        PathsFromVertexResult fromVertexToAllDfsNoRec(const Graph &g, const int start) {
+            if(!g.vertexValid(start)) throw std::invalid_argument("Invalid start vertex");
+
+            std::vector<int> distTo(g.V(), -1); // number of steps from start to vertex
+            std::vector<int> edgeTo(g.V(), -1); // from which vertex another vertex was visited from the first time
+
+            distTo[start] = 0;
+            std::stack<std::pair<int,size_t>> stack {}; // vertex ID and index of next adjacent vertex to look at
+            stack.push({start, 0});
+            while(!stack.empty()) {
+                const auto [v, adjIndexStart] = stack.top();
+                stack.pop();
+
+                for(size_t otherIdx=adjIndexStart; otherIdx < g.adj(v).size(); ++otherIdx) {
+                    const int other = g.adj(v)[otherIdx];
+                    if(distTo[other] == -1) {
+                        // other is the first adjacent vertex to v to be found unvisited
+                        // -> add this state to stack and look at other next
+                        // This saves the remaining vertices implicitly
+                        stack.push({v, otherIdx+1});
+                        distTo[other] = distTo[v]+1;
+                        edgeTo[other] = v;
+                        stack.push({other, 0});
+                        break;
+                    }
+                }
+            }
+
+            // return queryable results
+            return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
+        }
+
+
         namespace internal {
             // Recursive function for depth first search to all vertices from v
-            void fromVertexToAllRec(const Graph& g, const int v, // NOLINT
+            void fromVertexToAllDfsRec(const Graph& g, const int v, // NOLINT
                                     std::vector<int>& distTo, std::vector<int>& edgeTo) {
                 for(const int other : g.adj(v)) {
                     if(distTo[other] == -1) {
                         // not yet visited
                         distTo[other] = distTo[v]+1;
                         edgeTo[other] = v; // save that we got to other from v
-                        fromVertexToAllRec(g, other, distTo, edgeTo);
+                        fromVertexToAllDfsRec(g, other, distTo, edgeTo);
                     }
                 }
             }
         }
 
         // Depth-first search from vertex start to all reachable vertices
-        PathsFromVertexResult fromVertexToAll(const Graph &g, const int start) {
+        PathsFromVertexResult fromVertexToAllDfs(const Graph &g, const int start) {
             if(!g.vertexValid(start)) throw std::invalid_argument("Invalid start vertex");
 
             std::vector<int> distTo(g.V(), -1); // number of steps from start to vertex
@@ -263,16 +316,14 @@ namespace graph {
 
             distTo[start] = 0;
             // start recursive depth-first start from start
-            internal::fromVertexToAllRec(g, start, distTo, edgeTo);
+            internal::fromVertexToAllDfsRec(g, start, distTo, edgeTo);
 
             // return queryable results
             return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
         }
-    } // depth_first_search
 
-    namespace breadth_first_search {
         // Breadth-first search from vertex start to all reachable vertices
-        PathsFromVertexResult fromVertexToAll(const Graph &g, const int start) {
+        PathsFromVertexResult fromVertexToAllBfs(const Graph &g, const int start) {
             if(start < 0 || start >= g.V()) throw std::invalid_argument("Invalid start vertex");
 
             std::vector<int> distTo(g.V(), -1); // number of steps from start to vertex
@@ -299,7 +350,7 @@ namespace graph {
             // return queryable results
             return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
         }
-    }
+    } // find_all_paths
 
     // class to calculate connected components in graph
     class ConnectedComponents {

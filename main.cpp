@@ -4,7 +4,7 @@
 #include "Graph.h"
 
 // print elements of a vector to stdout separated by delimiter and with last at the end
-void print_vec(const std::vector<int>& vec, const char* delimiter="->", const char* last="\n") {
+void print_vec(const std::vector<int>& vec, std::string_view delimiter="->", std::string_view last="\n") {
     if(vec.empty()) return;
 
     bool first=true;
@@ -20,7 +20,7 @@ void print_vec(const std::vector<int>& vec, const char* delimiter="->", const ch
 }
 
 // print all paths saved in paths to stdout
-void print_paths(const graph::Graph& g, const graph::PathsFromVertexResult& paths) {
+void print_paths(const graph::Graph& g, const graph::find_paths_to_all::PathsFromVertexResult& paths) {
     for(int i=0; i<g.V(); ++i) {
         if(paths.hasPathTo(i)) {
             std::cout << "0 to " << i << " (dist=" << paths.distanceTo(i) << "): ";
@@ -49,13 +49,13 @@ int main(int argc, char* argv[]) {
     std::cout<<"----\n";
 
     // Depth-first Search from 0 to all connected vertices
-    graph::PathsFromVertexResult dfs_from_0 = graph::depth_first_search::fromVertexToAll(*pGraph, 0);
+    graph::find_paths_to_all::PathsFromVertexResult dfs_from_0 = graph::find_paths_to_all::fromVertexToAllDfs(*pGraph, 0);
     std::cout<<"Found DFS paths from 0: \n";
     print_paths(*pGraph, dfs_from_0);
     std::cout<<"----\n";
 
     // Breadth-first Search from 0 to all connected vertices
-    graph::PathsFromVertexResult bfs_from_0 = graph::breadth_first_search::fromVertexToAll(*pGraph, 0);
+    graph::find_paths_to_all::PathsFromVertexResult bfs_from_0 = graph::find_paths_to_all::fromVertexToAllBfs(*pGraph, 0);
     std::cout<<"Found BFS paths from 0: \n";
     print_paths(*pGraph, bfs_from_0);
     std::cout<<"----\n";
@@ -70,5 +70,6 @@ int main(int argc, char* argv[]) {
     std::cout<<"----\n";
 
     std::cout<<"Bipartite: "<<graph::isBipartite(*pGraph)<<"\n";
+
     return 0;
 }

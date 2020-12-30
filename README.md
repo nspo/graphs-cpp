@@ -18,14 +18,16 @@
   make
   ```
 
-## `Graph.h`
+## `include/Graph.h`
 - Simple (undirected) `Graph` interface
 - `AdjacencyListGraph` (https://en.wikipedia.org/wiki/Adjacency_list)
-- Utility functions (a few)
-- Depth-first Search (DFS, https://en.wikipedia.org/wiki/Depth-first_search)
-- Breadth-first Search (BFS, https://en.wikipedia.org/wiki/Breadth-first_search)
-- Connected components (https://en.wikipedia.org/wiki/Component_(graph_theory))
-- Bipartiteness (https://en.wikipedia.org/wiki/Bipartite_graph)
+- Basic utility functions (a few)
+- Find paths starting at a vortex to all connected vertices
+  - with [Depth-first Search (DFS)](https://en.wikipedia.org/wiki/Depth-first_search) recursively (`graph::find_paths_to_all::fromVertexToAllDfs`)
+  - with DFS iteratively (`graph::find_paths_to_all::fromVertexToAllDfsNoRec`)
+  - with [Breadth-first Search (BFS)](https://en.wikipedia.org/wiki/Breadth-first_search) iteratively (`graph::find_paths_to_all::fromVertexToAllBfs`)
+- Find connected components (https://en.wikipedia.org/wiki/Component_(graph_theory)) with DFS (`graph::ConnectedComponents`)
+- Check whether a graph is [bipartite](https://en.wikipedia.org/wiki/Bipartite_graph) with DFS (`graph::isBipartite`)
 
 ## `main.cpp`
 - Basic test of `Graph.h` functionality

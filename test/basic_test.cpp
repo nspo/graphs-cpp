@@ -45,21 +45,28 @@ TEST(basic_test, basic_ops) { // NOLINT
 TEST(basic_test, dfs) { // NOLINT
     auto pGraph = readGraph();
 
-    EXPECT_ANY_THROW(graph::depth_first_search::fromVertexToAll(*pGraph, 30));
-    const auto dfs_from_0 = graph::depth_first_search::fromVertexToAll(*pGraph, 0);
+    EXPECT_ANY_THROW(graph::find_paths_to_all::fromVertexToAllDfs(*pGraph, 30));
+    const auto dfs_from_0 = graph::find_paths_to_all::fromVertexToAllDfs(*pGraph, 0);
     EXPECT_FALSE(dfs_from_0.hasPathTo(10));
     EXPECT_TRUE(dfs_from_0.hasPathTo(3));
     EXPECT_GE(dfs_from_0.pathTo(3).size(), 3);
+
+    const auto dfs_from_0_noRec = graph::find_paths_to_all::fromVertexToAllDfsNoRec(*pGraph, 0);
+    EXPECT_TRUE(dfs_from_0 == dfs_from_0_noRec);
+    EXPECT_TRUE(dfs_from_0 == graph::find_paths_to_all::fromVertexToAllDfsNoRec(*pGraph, 0));
 }
 
 TEST(basic_test, bfs) { // NOLINT
     auto pGraph = readGraph();
 
-    EXPECT_ANY_THROW(graph::breadth_first_search::fromVertexToAll(*pGraph, 30));
-    const auto bfs_from_0 = graph::breadth_first_search::fromVertexToAll(*pGraph, 0);
+    EXPECT_ANY_THROW(graph::find_paths_to_all::fromVertexToAllBfs(*pGraph, 30));
+    const auto bfs_from_0 = graph::find_paths_to_all::fromVertexToAllBfs(*pGraph, 0);
     EXPECT_FALSE(bfs_from_0.hasPathTo(10));
     EXPECT_TRUE(bfs_from_0.hasPathTo(3));
     EXPECT_EQ(bfs_from_0.pathTo(3).size(), 3);
+
+    const auto dfs_from_0 = graph::find_paths_to_all::fromVertexToAllDfs(*pGraph, 0);
+    EXPECT_TRUE(bfs_from_0 != dfs_from_0);
 }
 
 TEST(basic_test, connectedComponents) { // NOLINT
