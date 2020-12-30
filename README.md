@@ -5,6 +5,7 @@
 - uses modern C++ instead of `new` and other dated patterns; e.g.
   - `std::vector`
   - `std::unique_ptr`
+- unit tests under `test/`
 - this is an example project and not a huge library
 
 ## Compilation
@@ -18,15 +19,18 @@
   ```
 
 ## `Graph.h`
-- Simple `Graph` interface
+- Simple (undirected) `Graph` interface
 - `AdjacencyListGraph` (https://en.wikipedia.org/wiki/Adjacency_list)
 - Utility functions (a few)
 - Depth-first Search (DFS, https://en.wikipedia.org/wiki/Depth-first_search)
 - Breadth-first Search (BFS, https://en.wikipedia.org/wiki/Breadth-first_search)
+- Connected components (https://en.wikipedia.org/wiki/Component_(graph_theory))
+- Bipartiteness (https://en.wikipedia.org/wiki/Bipartite_graph)
 
 ## `main.cpp`
 - Basic test of `Graph.h` functionality
 - Reads graphs from standard input (`./graphs_test < tinyG.txt`) or file given as program argument (`./graphs_test tinyG.txt`) 
+- Sample graph from `tinyG.txt`:
   ![](picTinyG.png)
 
 ## References

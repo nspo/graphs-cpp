@@ -48,13 +48,13 @@ int main(int argc, char* argv[]) {
     std::cout << "Number of self-loops: " << numSelfLoops(*pGraph) << "\n";
     std::cout<<"----\n";
 
-    // Depth-first Search
+    // Depth-first Search from 0 to all connected vertices
     graph::PathsFromVertexResult dfs_from_0 = graph::depth_first_search::fromVertexToAll(*pGraph, 0);
     std::cout<<"Found DFS paths from 0: \n";
     print_paths(*pGraph, dfs_from_0);
     std::cout<<"----\n";
 
-    // Breadth-first Search
+    // Breadth-first Search from 0 to all connected vertices
     graph::PathsFromVertexResult bfs_from_0 = graph::breadth_first_search::fromVertexToAll(*pGraph, 0);
     std::cout<<"Found BFS paths from 0: \n";
     print_paths(*pGraph, bfs_from_0);
@@ -69,6 +69,6 @@ int main(int argc, char* argv[]) {
     }
     std::cout<<"----\n";
 
-
+    std::cout<<"Bipartite: "<<graph::isBipartite(*pGraph)<<"\n";
     return 0;
 }

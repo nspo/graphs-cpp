@@ -132,6 +132,42 @@ namespace graph {
     }
 
     namespace internal {
+        // Check all unvisited vertices connected to v recursively with DFS for whether they prevent bipartiteness
+        bool isBipartiteRec(const Graph& g, const int v, const int lastSetId, std::vector<int>& setId) {
+            const int expectedSetId = lastSetId == 0 ? 1 : 0; // value which vertices adjacent to v must have
+            // check all vertices adjacent to v
+            for(const int other : g.adj(v)) {
+                if(setId[other] == -1) {
+                    // yet unvisited -> visit
+                    setId[other] = expectedSetId;
+                    if(!internal::isBipartiteRec(g, other, expectedSetId, setId)) return false;
+                } else if(setId[other] != expectedSetId) {
+                    // mismatch! -> not bipartite
+                    return false;
+                } // else everything okay
+            }
+            return true;
+        }
+    }
+
+    // check whether graph is bipartite, i.e. the vertices can be divided into two disjoint sets such that every edge
+    // connects a vertex from one set to a vertex of the other set
+    bool isBipartite(const Graph& g) {
+        // assign 0 and 1 in alternation to all vertices via DFS
+        std::vector<int> setId(g.V(), -1);
+//        int lastId = 1; // so that the very first vertex is assigned 0 - does not matter though
+        for(int i=0; i<g.V(); ++i) {
+            if(setId[i] == -1) {
+                // yet unvisited component
+                setId[i] = 0;
+                if(!internal::isBipartiteRec(g, i, 0, setId)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    namespace internal {
         // return whether element v exists in a collection col
         template<typename Col>
         [[nodiscard]] inline bool validIndex(const Col& col, const int v) {

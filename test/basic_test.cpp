@@ -61,3 +61,15 @@ TEST(basic_test, bfs) { // NOLINT
     EXPECT_TRUE(bfs_from_0.hasPathTo(3));
     EXPECT_EQ(bfs_from_0.pathTo(3).size(), 3);
 }
+
+TEST(basic_test, connectedComponents) { // NOLINT
+    auto pGraph = readGraph();
+
+    EXPECT_EQ(graph::ConnectedComponents(*pGraph).components().size(), 3);
+}
+
+TEST(basic_test, bipartiteness) { // NOLINT
+    auto pGraph = readGraph();
+
+    EXPECT_FALSE(graph::isBipartite(*pGraph));
+}
