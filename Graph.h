@@ -263,8 +263,81 @@ namespace graph {
             // return queryable results
             return PathsFromVertexResult(start, std::move(distTo), std::move(edgeTo));
         }
-
     }
+
+    // class to calculate connected components in graph
+    class ConnectedComponents {
+    public:
+        // calculate connected components of graph g
+        explicit ConnectedComponents(const Graph& g)
+                                    :
+                                    componentId(g.V(), -1), numComponents(0), numVerticesPerComponent{} {
+            // go to all vertices of graph
+            for(int i=0; i < g.V(); ++i) {
+                if (componentId[i] == -1) {
+                    // yet unvisited
+                    numVerticesPerComponent.push_back(0);
+                    dfs(g, i); // visit all connected vertices through recursive DFS
+                    ++numComponents;
+                }
+            }
+        }
+
+        // number of connected components
+        [[nodiscard]] int count() const {
+            return numComponents;
+        }
+
+        // component id of a vertex
+        [[nodiscard]] int id(const int v) const {
+            if(!internal::validIndex(componentId, v)) throw std::invalid_argument("Invalid vertex");
+            return componentId[v];
+        }
+
+        // whether two vertices are connected
+        [[nodiscard]] bool connected(const int v1, const int v2) const {
+            if(!internal::validIndex(componentId, v1) || !internal::validIndex(componentId, v2)) {
+                throw std::invalid_argument("Invalid vertex");
+            }
+
+            return componentId[v1] == componentId[v2];
+        }
+
+        // return all connected components
+        [[nodiscard]] std::vector<std::vector<int>> components() const {
+            // init result
+            std::vector<std::vector<int>> result(numComponents, std::vector<int>{});
+            // loop through all vertices
+            for(int i=0; static_cast<size_t>(i)<componentId.size(); ++i) {
+                const int id = componentId[i];
+                if(result[id].capacity() < static_cast<size_t>(numVerticesPerComponent[id])) {
+                    // reserve memory for all vertices in this component
+                    result[id].reserve(numVerticesPerComponent[id]);
+                }
+                // add vertex to result
+                result[id].push_back(i);
+            }
+            return result;
+        }
+
+    private:
+        std::vector<int> componentId; // IDs of connected components, one element per vertex
+        int numComponents;
+
+        std::vector<int> numVerticesPerComponent; // to make executing components() faster
+
+        // Recursive DFS for finding connected components
+        void dfs(const Graph& g, const int v) { // NOLINT
+            componentId[v] = numComponents; // mark as visited and set component id
+            ++numVerticesPerComponent.back(); // increase number of vertices in current component
+            for(const int other : g.adj(v)) {
+                // visit all unvisited adjacent vertices
+                if(componentId[other] == -1) {
+                    dfs(g, other);
+                }
+            }
+        }
+    };
 
 } // namespace graph
 

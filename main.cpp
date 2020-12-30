@@ -60,5 +60,15 @@ int main(int argc, char* argv[]) {
     print_paths(*pGraph, bfs_from_0);
     std::cout<<"----\n";
 
+    // Connected components
+    graph::ConnectedComponents connectedComponents(*pGraph);
+    std::cout<<"Number of connected components: "<<connectedComponents.count()<<"\n";
+    std::cout<<"All connected components in graph: \n";
+    for(const auto& comp : connectedComponents.components()) {
+        print_vec(comp, " ");
+    }
+    std::cout<<"----\n";
+
+
     return 0;
 }
