@@ -9,4 +9,9 @@ else()
 add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+include_directories(.)
+
 add_executable(graphs_test main.cpp)
+
+add_subdirectory(submodules/googletest)
+add_subdirectory(test)

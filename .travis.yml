@@ -1,0 +1,15 @@
+dist: focal
+language: cpp
+addons:
+  apt:
+    packages:
+      - build-essential
+
+script:
+  - echo "C++ tests"
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - test/graphs_cpp_gtest
+
