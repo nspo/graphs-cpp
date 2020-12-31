@@ -1,10 +1,10 @@
-# Graphs with modern C++
+# Undirected graphs with modern C++
 
 ## General
 - Code for graph problems
-- uses modern C++ instead of `new` and other dated patterns; e.g.
-  - `std::vector`
+- uses modern C++ instead of owning raw pointers, `new`, and other dated patterns; e.g.
   - `std::unique_ptr`
+  - move semantics
 - unit tests under `test/`
 - this is an example project and not a huge library
 
