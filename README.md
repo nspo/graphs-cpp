@@ -9,7 +9,7 @@
 - this is an example project and not a huge library
 
 ## Compilation
-- Manually: `g++ -std=c++17 -O3 main.cpp -o graphs_test`
+- Manually: `g++ -std=c++17 -O3 main.cpp -I include/ -o graphs_test`
 - or with `cmake`:
   ```bash
   mkdir build
