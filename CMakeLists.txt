@@ -11,7 +11,8 @@ endif()
 
 include_directories(include)
 
-add_executable(graphs_test main.cpp)
+add_executable(graphs_demo graphs_main.cpp)
+add_executable(digraphs_demo digraphs_main.cpp)
 
 add_subdirectory(submodules/googletest)
 add_subdirectory(test)

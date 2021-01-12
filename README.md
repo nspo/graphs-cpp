@@ -1,24 +1,15 @@
-# Undirected graphs with modern C++
+# Unweighted graphs and digraphs with modern C++
 
 ## General
-- Code for graph problems
-- uses modern C++ instead of owning raw pointers, `new`, and other dated patterns; e.g.
-  - `std::unique_ptr`
-  - move semantics
+- Code for unweighted graph and digraph problems
+- no usage of owning raw pointers, `new`, or similarly dated patterns
 - unit tests under `test/`
-- this is an example project and not a huge library
+- this is a sample project and not a huge library
+- for weighted graphs and digraphs see [this repository](https://github.com/nspo/weighted-graphs-cpp)
 
-## Compilation
-- Manually: `g++ -std=c++17 -O3 main.cpp -I include/ -o graphs_test`
-- or with `cmake`:
-  ```bash
-  mkdir build
-  cd build/
-  cmake ..
-  make
-  ```
+## Unweighted graphs
 
-## `include/Graph.h`
+### `include/Graph.h`
 - Simple (undirected) `Graph` interface
 - `AdjacencyListGraph` (https://en.wikipedia.org/wiki/Adjacency_list)
 - Basic utility functions (a few)
@@ -29,11 +20,36 @@
 - Find connected components (https://en.wikipedia.org/wiki/Component_(graph_theory)) with DFS (`graph::ConnectedComponents`)
 - Check whether a graph is [bipartite](https://en.wikipedia.org/wiki/Bipartite_graph) with DFS (`graph::isBipartite`)
 
-## `main.cpp`
+### `graphs_main.cpp`
 - Basic test of `Graph.h` functionality
-- Reads graphs from standard input (`./graphs_test < tinyG.txt`) or file given as program argument (`./graphs_test tinyG.txt`) 
+- Reads graphs from standard input (`build/graphs_demo < tinyG.txt`) or file given as program argument (`build/graphs_demo tinyG.txt`) 
 - Sample graph from `tinyG.txt`:
   ![](picTinyG.png)
+
+## Unweighted digraphs
+
+### `include/Digraph.h`
+- Simple `Digraph` interface
+- `AdjacencyListDigraph` (https://en.wikipedia.org/wiki/Adjacency_list)
+- check for cycles
+- calculate topological sort (https://en.wikipedia.org/wiki/Topological_sorting)
+- calculate strongly-connected components with Kosaraju-Sharir algorithm (https://en.wikipedia.org/wiki/Kosaraju%27s_algorithm)
+
+### `digraphs_main.cpp`
+- Basic test of `Digraph.h` functionality
+- Reads digraph from standard input (`build/digraphs_demo < tinyDG.txt`) or file given as program argument (`build/digraphs_demo tinyDG.txt`)
+- Sample digraph from `tinyDG.txt`:
+
+  ![](picTinyDG.png)
+
+## Compilation
+- with `cmake`:
+  ```bash
+  mkdir build
+  cd build/
+  cmake ..
+  make
+  ```
 
 ## References
 - Algorithms, [Part II](https://www.coursera.org/learn/algorithms-part2/home/welcome) by Princeton University (Robert Sedgewick, Kevin Wayne)
