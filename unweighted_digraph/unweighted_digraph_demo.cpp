@@ -20,12 +20,12 @@ int main(int argc, char* argv[]) {
     const auto cycle = digraph::containsCycle(*pGraph);
     if(cycle) {
         std::cout<<"Cycle found: ";
-        digraph::print_vec(*cycle);
+        print_vec(*cycle);
     } else {
         std::cout<<"No cycle found\n";
         std::cout<<"Topological sort: ";
         const auto topologicalSort = digraph::topologicalSort(*pGraph);
-        digraph::print_vec(topologicalSort);
+        print_vec(topologicalSort);
     }
     std::cout<<"---\n";
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     const auto comps = digraph::StronglyConnectedComponents(*pGraph).components();
     for(size_t i=0; i<comps.size(); ++i) {
         std::cout<<"Component "<<i<<": ";
-        digraph::print_vec(comps[i], "-");
+        print_vec(comps[i], "-");
     }
 
     std::cout<<"---\n";

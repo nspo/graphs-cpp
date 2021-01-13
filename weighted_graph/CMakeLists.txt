@@ -1,0 +1,3 @@
+include_directories(include)
+
+add_executable(weighted_graph_demo weighted_graph_demo.cpp)

@@ -1,0 +1,3 @@
+include_directories(include)
+
+add_executable(unweighted_digraph_demo unweighted_digraph_demo.cpp)

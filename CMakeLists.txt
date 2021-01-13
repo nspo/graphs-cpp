@@ -9,10 +9,12 @@ else()
 add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-include_directories(include)
-
-add_executable(graphs_demo graphs_main.cpp)
-add_executable(digraphs_demo digraphs_main.cpp)
-
 add_subdirectory(submodules/googletest)
-add_subdirectory(test)
+
+add_subdirectory(general)
+include_directories(general/include)
+
+add_subdirectory(unweighted_graph)
+add_subdirectory(unweighted_digraph)
+add_subdirectory(weighted_graph)
+add_subdirectory(weighted_digraph)

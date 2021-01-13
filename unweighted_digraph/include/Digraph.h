@@ -7,6 +7,7 @@
 #include <deque>
 #include <unordered_set>
 #include <stack>
+#include "PrintHelpers.h"
 
 namespace digraph {
 
@@ -108,23 +109,6 @@ namespace digraph {
         std::vector <std::vector<int>> adjacencies{}; // vector with V elements each of size outDegree(vertex) to represent edges
 
     };
-
-    // print elements of a vector to stdout or ostream separated by delimiter and with last at the end
-    void print_vec(const std::vector<int>& vec, std::string_view delimiter="->", std::string_view last="\n",
-                   std::ostream& os = std::cout) {
-        if(vec.empty()) return;
-
-        bool first=true;
-        for(const auto& elem : vec) {
-            if(first) {
-                first = false;
-            } else {
-                os << delimiter;
-            }
-            os<<elem;
-        }
-        os<<last;
-    }
 
     namespace internal {
         bool containsCycleRec(const Digraph& dg, const int v, std::deque<bool>& visited,
