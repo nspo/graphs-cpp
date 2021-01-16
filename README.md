@@ -65,12 +65,14 @@
 ### `include/`
 - `EdgeWeightedDigraph` interface and an implementation with adjacency lists
 - `SingleSourceShortestPath` as an interface for finding shortest paths to all other nodes starting at a start vertex:
-  - `SingleSourceDijkstraShortestPath` as an implementation of [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) for all weighted digraphs without negative edge weights
-  - `SingleSourceAcyclicShortestPath` for acyclic weighted digraphs - uses the topological order
+  - `SingleSourceAcyclicShortestPath` for acyclic weighted digraphs using the topological order
+  - `SingleSourceDijkstraShortestPath` as an implementation of [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) for weighted digraphs without negative edge weights
+  - `SingleSourceBellmanFordShortestPath` for digraphs with negative edge weights (but without negative cycles)
 
 ### `weighted_digraph_demo.cpp`
 - Reads a weighted digraph from standard input or a file given as program argument
-- Determines the shortest paths starting at vertex 0 with Dijkstra's algorithm and prints the results
+- Determines the shortest paths starting at vertex 0 and prints the results
+  - Depending on whether the digraph is acyclic, contains no negative edge weights, or does contain negative edge weights, the DAG algorithm, Dijkstra's algorithm, or the Bellman-Ford algorithm is chosen respectively
 - Sample edge-weighted digraph from `tinyEWD.txt` (without showing weights):
 
   ![](picTinyEWD.png)

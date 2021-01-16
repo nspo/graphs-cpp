@@ -2,6 +2,7 @@
 #include <fstream>
 #include <memory>
 #include <SingleSourceAcyclicShortestPath.h>
+#include <SingleSourceBellmanFordShortestPath.h>
 #include "EdgeWeightedAdjacencyListDigraph.h"
 #include "SingleSourceDijkstraShortestPath.h"
 #include "TopologicalSort.h"
@@ -25,17 +26,32 @@ int main(int argc, char* argv[]) {
 
     std::unique_ptr<SingleSourceShortestPath> sssp;
     if (auto cycle = containsCycle(*digraph); cycle) {
-        std::cout<<"Digraph contains a cycle: ";
+        std::cout<<"Digraph contains at least one cycle: ";
         print_vec(*cycle);
 
-        std::cout<<"Using Dijkstra for shortest paths...\n";
-        sssp = std::make_unique<SingleSourceDijkstraShortestPath>(*digraph, from);
+        bool containsNegativeEdgeWeight = false;
+        for(int v=0; v<digraph->V(); ++v) {
+            for(const auto& edge : digraph->adj(v)) {
+                if (edge.weight() < 0) {
+                    containsNegativeEdgeWeight = true;
+                    break;
+                }
+            }
+        }
+
+        if (containsNegativeEdgeWeight) {
+            std::cout<<"Digraph contains negative edge weights -> using Bellman-Ford algorithm for shortest paths\n";
+            sssp = std::make_unique<SingleSourceBellmanFordShortestPath>(*digraph, from);
+        } else {
+            std::cout<<"Digraph does not contain negative edge weights -> using Dijkstra's algorithm for shortest paths\n";
+            sssp = std::make_unique<SingleSourceDijkstraShortestPath>(*digraph, from);
+        }
+
     } else {
-        std::cout<<"Digraph does not contain a cycle (i.e. it's a DAG)\n";
+        std::cout<<"Digraph does not contain a cycle (i.e. it's a DAG) -> using DAG algorithm for shortest paths\n";
         std::cout<<"Topological order: ";
         print_vec(topologicalSort(*digraph));
 
-        std::cout<<"Using DAG algorithm for shortest paths...\n";
         sssp = std::make_unique<SingleSourceAcyclicShortestPath>(*digraph, from);
     }
 
