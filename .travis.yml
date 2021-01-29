@@ -12,11 +12,11 @@ script:
   - make
   - cd ..
   - echo "C++ tests"
-  - build/general/test/general_gtest
-  - build/unweighted_graph/test/unweighted_graph_gtest
+  - find build/ -name "*_gtest" -exec {} \;
   - echo "C++ examples"
   - build/unweighted_graph/unweighted_graph_demo tinyG.txt
   - build/unweighted_digraph/unweighted_digraph_demo tinyDG.txt
   - build/weighted_graph/weighted_graph_demo tinyEWG.txt
   - build/weighted_digraph/weighted_digraph_demo tinyEWD.txt
   - build/weighted_digraph/weighted_digraph_demo tinyEWDAG.txt
+  - build/flow_network/flow_network_demo flow_network/tinyFN.txt

@@ -81,6 +81,19 @@
 
   ![](picTinyEWDAG.png)
 
+## Flow networks (`flow_network/`)
+
+### `include/`
+- `FlowEdge` as an edge with capacity and flow in a [flow network](https://en.wikipedia.org/wiki/Flow_network)
+- `FlowNetwork` and `AdjancyListFlowNetwork` as interface and implementation of a flow network
+- `FordFulkerson` as an implementation of the [Ford-Fulkerson algorithm](https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm) to solve the min-cut and max-flow problems in flow networks
+
+### `flow_network_demo.cpp`
+- Reads flow network from file or standard input and prints it
+- Calculate max-flow and min-cut
+
+  ![](flow_network/picTinyFN.png)
+
 
 ## Compilation and execution
 - Download submodules (for unit tests): `git submodule update --init --recursive`
@@ -99,6 +112,7 @@
   - `build/weighted_graph/weighted_graph_demo tinyEWG.txt`
   - `build/weighted_digraph/weighted_digraph_demo tinyEWD.txt`
   - `build/weighted_digraph/weighted_digraph_demo tinyEWDAG.txt`
+  - `build/flow_network/flow_network_demo flow_network/tinyFN.txt`
 
 ## References
 - Introduction to Algorithms by Cormen et al.
