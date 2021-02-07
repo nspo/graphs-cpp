@@ -27,9 +27,9 @@
 
 ### `unweighted_graph_demo.cpp`
 - Basic test of `Graph.h` functionality
-- Reads graphs from standard input (`build/unweighted_graph/unweighted_graph_demo < tinyG.txt`) or file given as program argument (`build/unweighted_graph/unweighted_graph_demo tinyG.txt`) 
+- Reads graphs from standard input (`build/unweighted_graph/unweighted_graph_demo < unweighted_graph/tinyG.txt`) or file given as program argument (`build/unweighted_graph/unweighted_graph_demo unweighted_graph/tinyG.txt`) 
 - Sample graph from `tinyG.txt`:
-  ![](picTinyG.png)
+  ![](unweighted_graph/picTinyG.png)
 
 ## Unweighted digraphs (`unweighted_digraph/`)
 
@@ -42,10 +42,10 @@
 
 ### `unweighted_digraph_demo.cpp`
 - Basic test of `Digraph.h` functionality
-- Reads digraph from standard input (`build/unweighted_digraph/unweighted_digraph_demo < tinyDG.txt`) or file given as program argument (`build/unweighted_digraph/unweighted_digraph_demo tinyDG.txt`)
+- Reads digraph from standard input (`build/unweighted_digraph/unweighted_digraph_demo < unweighted_digraph/tinyDG.txt`) or file given as program argument (`build/unweighted_digraph/unweighted_digraph_demo unweighted_digraph/tinyDG.txt`)
 - Sample digraph from `tinyDG.txt`:
 
-  ![](picTinyDG.png)
+  ![](unweighted_digraph/picTinyDG.png)
 
 ## Weighted graphs (`weighted_graph/`)
 
@@ -58,7 +58,7 @@
 - Prints the graph's edges and the Minimum Spanning Tree edges
 - Sample edge-weighted graph from `tinyEWG.txt` and its Minimum Spanning Tree:
 
-  ![](picTinyEWG.png)
+  ![](weighted_graph/picTinyEWG.png)
 
 ## Weighted digraphs (`weighted_digraph/`)
 
@@ -75,11 +75,11 @@
   - Depending on whether the digraph is acyclic, contains no negative edge weights, or does contain negative edge weights, the DAG algorithm, Dijkstra's algorithm, or the Bellman-Ford algorithm is chosen respectively
 - Sample edge-weighted digraph from `tinyEWD.txt` (without showing weights):
 
-  ![](picTinyEWD.png)
+  ![](weighted_digraph/picTinyEWD.png)
   
 - Sample edge-weighted **acyclic** digraph from `tinyEWDAG.txt` (without showing weights):
 
-  ![](picTinyEWDAG.png)
+  ![](weighted_digraph/picTinyEWDAG.png)
 
 ## Flow networks (`flow_network/`)
 
@@ -107,11 +107,11 @@
 - Go to top-level folder again: `cd ..`
 - Run all tests: `find build/ -name "*_gtest" -exec {} \;`
 - Run demos:
-  - `build/unweighted_graph/unweighted_graph_demo tinyG.txt`
-  - `build/unweighted_digraph/unweighted_digraph_demo tinyDG.txt`
-  - `build/weighted_graph/weighted_graph_demo tinyEWG.txt`
-  - `build/weighted_digraph/weighted_digraph_demo tinyEWD.txt`
-  - `build/weighted_digraph/weighted_digraph_demo tinyEWDAG.txt`
+  - `build/unweighted_graph/unweighted_graph_demo unweighted_graph/tinyG.txt`
+  - `build/unweighted_digraph/unweighted_digraph_demo unweighted_digraph/tinyDG.txt`
+  - `build/weighted_graph/weighted_graph_demo weighted_graph/tinyEWG.txt`
+  - `build/weighted_digraph/weighted_digraph_demo weighted_digraph/tinyEWD.txt`
+  - `build/weighted_digraph/weighted_digraph_demo weighted_digraph/tinyEWDAG.txt`
   - `build/flow_network/flow_network_demo flow_network/tinyFN.txt`
 
 ## References
